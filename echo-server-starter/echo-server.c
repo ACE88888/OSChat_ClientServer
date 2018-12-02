@@ -23,13 +23,19 @@ typedef struct sockaddr SA;
 #define LISTENQ 1024
 
 // We will use this as a simple circular buffer of incoming messages.
-char message_buf[20][50];
+room room_buf[20];
 
 // This is an index into the message buffer.
 int msgi = 0;
 
 // A lock for the message buffer.
 pthread_mutex_t lock;
+
+// A structure to represent chat rooms.
+struct room {
+  char name[20];
+  int port[50];
+}
 
 // Initialize the message buffer to empty strings.
 void init_message_buf() {
