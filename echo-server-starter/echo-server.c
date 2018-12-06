@@ -54,6 +54,19 @@ void init_message_buf() {
   }
 }
 
+// Initialize the room buffer to empty strings.
+void init_room_buf() {
+  int i;
+  int j;
+  for (i = 0; i < 20; i++) {
+    strcpy(room_buf[i].name, "");
+    for (j = 0; j < 50; j++) {
+      strcpy(room_buf[i].sessions[j].nickname, "");
+      room_buf[i].sessions[j].port = -1;
+    }
+  }
+}
+
 // This function adds a message that was received to the message buffer.
 // Notice the lock around the message buffer.
 void add_message(char *buf) {
@@ -130,12 +143,17 @@ int send_echo_message(int connfd, char *message) {
   return send_message(connfd, message);
 }
 
+void handleJoinRoom(char* nick_name, char* room_name) {
+
+}
+
 int process_message(int connfd, char *message) {
   if (is_list_message(message)) {
     printf("Server responding with list response.\n");
     return send_list_message(connfd);
   //Checking if the message starts with a command back-slash
   } else if (is_command(message)) {
+    //Parse the command arguments, if any.
     int i = 0;
     char *args[3];
     char *ptr = strtok(message, " ");
@@ -145,6 +163,7 @@ int process_message(int connfd, char *message) {
       ptr = strtok(NULL, " ");
     }
     if (is_join_command(message)) {
+      handleJoinRoom(args[1], args[2]);
       printf("Server received the join command.\n");
     } else if (is_rooms_command(message)) {
       printf("Server received the rooms command.\n");
@@ -218,6 +237,9 @@ int main(int argc, char **argv) {
 
   // initialize message buffer.
   init_message_buf();
+
+  // initialize room buffer.
+  init_room_buf();
 
   // Initialize the message buffer lock.
   pthread_mutex_init(&lock, NULL);
