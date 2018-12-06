@@ -34,8 +34,14 @@ pthread_mutex_t lock;
 // A structure to represent chat rooms.
 struct room {
   char name[20];
-  int port[50];
-}
+  session sessions[50];
+};
+
+// A structure to represent a user session.
+struct session {
+  char nickname[20];
+  int port;
+};
 
 // Initialize the message buffer to empty strings.
 void init_message_buf() {
@@ -104,6 +110,8 @@ int process_message(int connfd, char *message) {
   if (is_list_message(message)) {
     printf("Server responding with list response.\n");
     return send_list_message(connfd);
+  } else if (strcmp(message, '\', 1) == 0) {
+    printf("Server received a command.\n");
   } else {
     printf("Server responding with echo response.\n");
     return send_echo_message(connfd, message);
