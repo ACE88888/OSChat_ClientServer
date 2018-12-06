@@ -23,7 +23,7 @@ typedef struct sockaddr SA;
 #define LISTENQ 1024
 
 // We will use this as a simple circular buffer of incoming messages.
-room room_buf[20];
+char message_buf[20][50];
 
 // This is an index into the message buffer.
 int msgi = 0;
@@ -31,17 +31,20 @@ int msgi = 0;
 // A lock for the message buffer.
 pthread_mutex_t lock;
 
-// A structure to represent chat rooms.
-struct room {
-  char name[20];
-  session sessions[50];
-};
-
 // A structure to represent a user session.
 struct session {
   char nickname[20];
   int port;
 };
+
+// A structure to represent chat rooms.
+struct room {
+  char name[20];
+  struct session sessions[50];
+};
+
+// Room buffer.
+struct room room_buf[20];
 
 // Initialize the message buffer to empty strings.
 void init_message_buf() {
@@ -83,6 +86,24 @@ int send_message(int connfd, char *message) {
 // A predicate function to test incoming message.
 int is_list_message(char *message) { return strncmp(message, "-", 1) == 0; }
 
+// Checks if the message is a join command.
+int is_join_command(char *message) { return strncmp(message, "\\JOIN", 5) == 0; }
+
+// Checks if the message is a rooms command.
+int is_rooms_command(char *message) { return strncmp(message, "\\ROOMS", 6) == 0; }
+
+// Checks if the message is a leave command.
+int is_leave_command(char *message) { return strncmp(message, "\\LEAVE", 6) == 0; }
+
+// Checks if the message is a who command.
+int is_who_command(char *message) { return strncmp(message, "\\WHO", 4) == 0; }
+
+// Checks if the message is a help command.
+int is_help_command(char *message) { return strncmp(message, "\\HELP", 5) == 0; }
+
+// Checks if the message is a nickname command.
+int is_nickname_command(char *message) { return strncmp(message, "\\NICKNAME", 9) == 0; }
+
 int send_list_message(connfd) {
   char message[20 * 50] = "";
   for (int i = 0; i < 20; i++) {
@@ -110,8 +131,18 @@ int process_message(int connfd, char *message) {
   if (is_list_message(message)) {
     printf("Server responding with list response.\n");
     return send_list_message(connfd);
-  } else if (strcmp(message, '\', 1) == 0) {
-    printf("Server received a command.\n");
+  } else if (is_join_command(message)) {
+    printf("Server received the join command.\n");
+  } else if (is_rooms_command(message)) {
+    printf("Server received the rooms command.\n");
+  } else if (is_leave_command(message)) {
+    printf("Server received the leave command.\n");
+  } else if (is_who_command(message)) {
+    printf("Server received the who command.\n");
+  } else if (is_help_command(message)) {
+    printf("Server received the help command.\n");
+  } else if (is_nickname_command(message)) {
+    printf("Server received the nickname command.\n");
   } else {
     printf("Server responding with echo response.\n");
     return send_echo_message(connfd, message);
