@@ -86,6 +86,9 @@ int send_message(int connfd, char *message) {
 // A predicate function to test incoming message.
 int is_list_message(char *message) { return strncmp(message, "-", 1) == 0; }
 
+// Checks if the message is starts with the command string.
+int is_command(char *message) { return strncmp(message, "\\", 1) == 0; }
+
 // Checks if the message is a join command.
 int is_join_command(char *message) { return strncmp(message, "\\JOIN", 5) == 0; }
 
@@ -131,18 +134,31 @@ int process_message(int connfd, char *message) {
   if (is_list_message(message)) {
     printf("Server responding with list response.\n");
     return send_list_message(connfd);
-  } else if (is_join_command(message)) {
-    printf("Server received the join command.\n");
-  } else if (is_rooms_command(message)) {
-    printf("Server received the rooms command.\n");
-  } else if (is_leave_command(message)) {
-    printf("Server received the leave command.\n");
-  } else if (is_who_command(message)) {
-    printf("Server received the who command.\n");
-  } else if (is_help_command(message)) {
-    printf("Server received the help command.\n");
-  } else if (is_nickname_command(message)) {
-    printf("Server received the nickname command.\n");
+  //Checking if the message starts with a command back-slash
+  } else if (is_command(message)) {
+    int i = 0;
+    char *args[3];
+    char *ptr = strtok(message, " ");
+    while (ptr != NULL) {
+      printf("%s\n", ptr);
+      args[i++] = ptr;
+      ptr = strtok(NULL, " ");
+    }
+    if (is_join_command(message)) {
+      printf("Server received the join command.\n");
+    } else if (is_rooms_command(message)) {
+      printf("Server received the rooms command.\n");
+    } else if (is_leave_command(message)) {
+      printf("Server received the leave command.\n");
+    } else if (is_who_command(message)) {
+      printf("Server received the who command.\n");
+    } else if (is_help_command(message)) {
+      printf("Server received the help command.\n");
+    } else if (is_nickname_command(message)) {
+      printf("Server received the nickname command.\n");
+    } else {
+      printf("The following command %s was not recognized.\n", message);
+    }
   } else {
     printf("Server responding with echo response.\n");
     return send_echo_message(connfd, message);
