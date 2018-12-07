@@ -147,6 +147,16 @@ void handleJoinRoom(char* nick_name, char* room_name) {
 
 }
 
+void roomlist();
+
+void endsession();
+
+void userlist();
+
+void commandlist();
+
+void handleusermessage(char nick_name, char* message);
+
 int process_message(int connfd, char *message) {
   if (is_list_message(message)) {
     printf("Server responding with list response.\n");
@@ -166,16 +176,22 @@ int process_message(int connfd, char *message) {
       handleJoinRoom(args[1], args[2]);
       printf("Server received the join command.\n");
     } else if (is_rooms_command(message)) {
+      roomlist();
       printf("Server received the rooms command.\n");
     } else if (is_leave_command(message)) {
+      endsession();
       printf("Server received the leave command.\n");
     } else if (is_who_command(message)) {
+      userlist();
       printf("Server received the who command.\n");
     } else if (is_help_command(message)) {
+      commandlist();
       printf("Server received the help command.\n");
     } else if (is_nickname_command(message)) {
+      handleusermessage(args[0], args[1]);
       printf("Server received the nickname command.\n");
     } else {
+    commandlist();
       printf("The following command %s was not recognized.\n", message);
     }
   } else {
