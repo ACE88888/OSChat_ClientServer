@@ -147,15 +147,37 @@ void handleJoinRoom(char* nick_name, char* room_name) {
 
 }
 
-void roomlist();
+void roomlist() {
+  int i;
+  for(i =0;i < 20;i++) {
+    if (strcmp(room_buf.name, "") == 0)
+      print(room_buf.name);
+  }
+}
 
-void endsession();
+void endsession() {
+}
 
-void userlist();
+void userlist() {
+  int i;
+  for(i =0;i < 20;i++) {
+    if (strcmp(session.nickname, "") == 0)
+      print(session.nickname);
+  }
+}
 
-void commandlist();
+void commandlist() {
+  print("Available commands are 
+  //JOIN nickname room \n
+  //ROOMS \n 
+  //LEAVE \n 
+  //WHO \n 
+  //HELP \n 
+  //nickname message \n");
+}
 
-void handleusermessage(char nick_name, char* message);
+void handleusermessage(char nick_name, char* message) {
+}
 
 int process_message(int connfd, char *message) {
   if (is_list_message(message)) {
