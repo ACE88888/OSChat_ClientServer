@@ -149,29 +149,38 @@ int send_echo_message(int connfd, char *message) {
   return send_message(connfd, message);
 }
 
+//This method allows a user to join a room with a nickname of their choice.
 int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
-  int i, j, flag;
-    for (i=0;i<20;i++) {
-      flag = 0;
-      if (strncmp(room_buf[i].name, room_name, strlen(room_name)) == 0) {
-        for (j=0;j<50;j++) {
-          if (strncmp(room_buf[i].sessions[j].nickname, "", 0) == 0)
-            strncpy(room_buf[i].sessions[j].nickname, nick_name, strlen(nick_name));
-            flag = 1;
-        }
-      }
-    }
-    if (flag ==0) {
-    	for (i = 0; i<20; i++){
-        if (flag == 0 && strncmp(room_buf[i].name, "", 0) == 0) {
-          strncpy(room_buf[i].name, room_name, strlen(room_name));
-          strncpy(room_buf[i].sessions[0].nickname, nick_name, strlen(nick_name));
+  int clientPort = connfd;
+  int i, j, flag = 0;
+  //Loop through the available rooms.
+  for (i = 0; i < 20; i++) {
+    //If the room name provided matches a room name, then loop through the room sessions.
+    if (strncmp(room_buf[i].name, room_name, strlen(room_name)) == 0) {
+      for (j = 0; j < 50; j++) {
+        //If there is an empty session (no nickname), then give that session a nickname and port.
+        if (strncmp(room_buf[i].sessions[j].nickname, "", 0) == 0)
+          strncpy(room_buf[i].sessions[j].nickname, nick_name, strlen(nick_name));
+          room_buf[i].sessions[j].port = clientPort;
           flag = 1;
-        }
+          break;
       }
     }
-    return send_message(connfd, (char*) "You have successfully joined the room.");
-
+  }
+  //If provided room does not exist, then loop through the rooms.
+  if (flag == 0) {
+  	for (i = 0; i < 20; i++) {
+      //If there is an empty room (no name), then create a room and provide attributes to the new user session.
+      if (strncmp(room_buf[i].name, "", 0) == 0) {
+        strncpy(room_buf[i].name, room_name, strlen(room_name));
+        strncpy(room_buf[i].sessions[0].nickname, nick_name, strlen(nick_name));
+        room_buf[i].sessions[j].port = clientPort;
+        flag = 1;
+        break;
+      }
+    }
+  }
+  return send_message(connfd, (char*) "You have successfully joined the room.");
 }
 
 //This method will send a user the list of available rooms.
