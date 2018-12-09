@@ -201,8 +201,9 @@ int handleExitSession(int connfd) {
   		}
   	}
   }
+  int result = send_message(connfd, (char*) "GOODBYE\n");
   close(connfd);
-  return send_message(connfd, (char*) "GOODBYE\n");
+  return result;
 }
 
 //This method will provide a list of all the users in the current room.
