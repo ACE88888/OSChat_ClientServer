@@ -55,9 +55,9 @@ void init_message_buf() {
 }
 struct session sessions[1000];
 void init_sessions(){
-for(int i = 0; i<1000;i++){
-strcpy(sessions[i].nickname, "");
-sessions[i].port = -1;
+	for(int i = 0; i<1000;i++){
+		strcpy(sessions[i].nickname, "");
+		sessions[i].port = -1;
 }
 }
 // Initialize the room buffer to empty strings.
@@ -174,14 +174,8 @@ void userlist(int roomId) {
   }
 }
 
-void handleCommandList() {
-  printf("The available commands are:\n");
-  printf("\\JOIN nickname room (join a specified room with the provided nickname)\n");
-  printf("\\ROOMS (list of all the available rooms)\n");
-  printf("\\LEAVE (leave the current room you are in)\n");
-  printf("\\WHO (list of all users in the current room)\n");
-  printf("\\HELP (list of commands)\n");
-  printf("\\nickname message (send a message to a user with the provided nickname)\n");
+void handleCommandList(int connfd) {
+  send_message(connfd, (char*) "The available commands are:\n\\JOIN nickname room (join a specified room with the provided nickname)\n\\ROOMS (list of all the available rooms)\n\\LEAVE (leave the current room you are in)\n\\WHO (list of all users in the current room)\n\\HELP (list of commands)\n\\nickname message (send a message to a user with the provided nickname)\n");
 }
 
 void handleusermessage(char* nick_name, char* message) {
@@ -216,7 +210,7 @@ int process_message(int connfd, char *message) {
       userlist(roomId);
       printf("Server received the who command.\n");
     } else if (is_help_command(message)) {
-      handleCommandList();
+      handleCommandList(connfd);
       printf("Server received the help command.\n");
     } else if (is_nickname_command(message)) {
       handleusermessage(args[0], args[1]);
