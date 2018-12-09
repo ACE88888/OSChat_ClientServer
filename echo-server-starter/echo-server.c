@@ -169,15 +169,12 @@ if (flag ==0) {
           flag = 1;
         }
       }
-<<<<<<< HEAD
 }
     printf("chat room is %s\n", room_buf[i].name);
-=======
-      if (flag == 1)
-        break;
-    }
+
+    
     send_message(connfd, (char*) "You have successfully joined the room.");
->>>>>>> 3aa1e845393b83a0536a560a0934911d0e9fbbe2
+
 }
 
 //This method will send a user the list of available rooms.
