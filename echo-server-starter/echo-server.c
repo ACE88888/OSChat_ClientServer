@@ -215,14 +215,17 @@ void handleCommandList(int connfd) {
   send_message(connfd, (char*) "The available commands are:\n\\JOIN nickname room (join a specified room with the provided nickname)\n\\ROOMS (list of all the available rooms)\n\\LEAVE (leave the current room you are in)\n\\WHO (list of all users in the current room)\n\\HELP (list of commands)\n\\nickname message (send a message to a user with the provided nickname)\n");
 }
 
-void handleusermessage(char* nick_name, char* message) {
-for( int i = 0; i<20;i++){
-	for (int j = 0; j<50;j++){
-		if(strcmp(room_buf[i].sessions[j].nickname, nick_name)==0){
-			send_message(room_buf[i].sessions[j].port, message);
-}
-}
-}
+//This method will send a message to a specific user with the given nickname.
+void handleUserMessage(char* nick_name, char* message) {
+  //Loop through the rooms and user sessions.
+  for (int i = 0; i < 20; i++){
+  	for (int j = 0; j < 50;j++){
+      //If the user with the provided nickname exists in a room, then send a message to that user.
+  		if (strcmp(room_buf[i].sessions[j].nickname, nick_name) == 0) {
+  			send_message(room_buf[i].sessions[j].port, message);
+      }
+    }
+  }
 }
 
 int process_message(int connfd, char *message) {
@@ -257,7 +260,7 @@ int process_message(int connfd, char *message) {
       handleCommandList(connfd);
       printf("Server received the help command.\n");
     } else if (is_nickname_command(message)) {
-      handleusermessage(args[0], args[1]);
+      handleUserMessage(args[0], args[1]);
       printf("Server received the nickname command.\n");
     } else {
       send_message(connfd, (char*) "The following command was not recognized.\n");
