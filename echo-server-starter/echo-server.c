@@ -153,16 +153,26 @@ void handleJoinRoom(char* nick_name, char* room_name) {
 
 }
 
-void roomlist() {
+//This method will send a user the list of available rooms.
+void handleRoomList(int connfd) {
   int i;
-  for(i =0; i < 20; i++) {
+  char* roomList;
+  //Loop through the list of rooms.
+  for(i = 0; i < 20; i++) {
+    //If the room is not blank (an existing room), then print the room name.
     if (strcmp(room_buf[i].name, "") == 0) {
-      printf("%s\n", room_buf[i].name);
+      strcat(roomList, room_buf[i].name);
+      strcat(roomList, "\n");
     }
   }
+  send_message(connfd, roomList);
 }
 
-void endsession() {
+//This method will remove a user from a chat room and send a GOODBYE message.
+void handleExitSession(int connfd) {
+  send_message(connfd, (char*) "GOODBYE\n");
+  close(connfd);
+
 }
 
 void userlist(int roomId) {
@@ -174,6 +184,7 @@ void userlist(int roomId) {
   }
 }
 
+//This method will send the user a current list of all the commands.
 void handleCommandList(int connfd) {
   send_message(connfd, (char*) "The available commands are:\n\\JOIN nickname room (join a specified room with the provided nickname)\n\\ROOMS (list of all the available rooms)\n\\LEAVE (leave the current room you are in)\n\\WHO (list of all users in the current room)\n\\HELP (list of commands)\n\\nickname message (send a message to a user with the provided nickname)\n");
 }
@@ -200,10 +211,10 @@ int process_message(int connfd, char *message) {
       handleJoinRoom(args[1], args[2]);
       printf("Server received the join command.\n");
     } else if (is_rooms_command(message)) {
-      roomlist();
+      handleRoomList(connfd);
       printf("Server received the rooms command.\n");
     } else if (is_leave_command(message)) {
-      endsession();
+      handleExitSession(connfd);
       printf("Server received the leave command.\n");
     } else if (is_who_command(message)) {
       int roomId = 1;
