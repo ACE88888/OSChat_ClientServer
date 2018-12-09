@@ -150,8 +150,28 @@ int send_echo_message(int connfd, char *message) {
 }
 
 void handleJoinRoom(char* nick_name, char* room_name) {
-
+  int i, j, flag;
+    for(i=0;i<20;i++) {
+      flag = 0;
+      if(strncmp(room_buf[i].name, room_name, strlen(room_name)) == 0) {
+        for(j=0;j<50;j++) {
+          if(strncmp(room_buf[i].sessions[j].nickname, "", 0) == 0)
+            strncpy(room_buf[i].sessions[j].nickname, nick_name, strlen(nick_name));
+            flag = 1;
+        }
+      } else {
+        if(strncmp(room_buf[i].name, "", 0) == 0) {
+          strncpy(room_buf[i].name, room_name, strlen(room_name));
+          strncpy(room_buf[i].sessions[0].nickname, nick_name, strlen(nick_name));
+          flag = 1;
+        }
+      }
+      if (flag == 1)
+        break;
+    }
+     printf("chat room is %s\n", room_buf[i].name);
 }
+
 
 void roomlist() {
   int i;
