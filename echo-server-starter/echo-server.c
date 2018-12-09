@@ -219,6 +219,13 @@ void handleCommandList(int connfd) {
 }
 
 void handleusermessage(char* nick_name, char* message) {
+for( int i = 0; i<20;i++){
+	for (int j = 0; j<50;j++){
+		if(strcmp(room_buf[i].sessions[j].nickname, nick_name)==0){
+			send_message(room_buf[i].sessions[j].port, message);
+}
+}
+}
 }
 
 int process_message(int connfd, char *message) {
