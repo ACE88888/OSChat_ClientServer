@@ -159,20 +159,17 @@ void handleJoinRoom(int connfd, char* nick_name, char* room_name) {
             strncpy(room_buf[i].sessions[j].nickname, nick_name, strlen(nick_name));
             flag = 1;
         }
-      } 
-}
-if (flag ==0) {
-	for (i = 0; i<20; i++){
+      }
+    }
+    if (flag ==0) {
+    	for (i = 0; i<20; i++){
         if (flag == 0 && strncmp(room_buf[i].name, "", 0) == 0) {
           strncpy(room_buf[i].name, room_name, strlen(room_name));
           strncpy(room_buf[i].sessions[0].nickname, nick_name, strlen(nick_name));
           flag = 1;
         }
       }
-}
-    printf("chat room is %s\n", room_buf[i].name);
-
-    
+    }
     send_message(connfd, (char*) "You have successfully joined the room.");
 
 }
