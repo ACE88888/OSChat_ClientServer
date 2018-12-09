@@ -53,7 +53,13 @@ void init_message_buf() {
     strcpy(message_buf[i], "");
   }
 }
-
+struct session sessions[1000];
+void init_sessions(){
+for(int i = 0; i<1000;i++){
+strcpy(sessions[i].nickname, "");
+sessions[i].port = -1;
+}
+}
 // Initialize the room buffer to empty strings.
 void init_room_buf() {
   int i;
