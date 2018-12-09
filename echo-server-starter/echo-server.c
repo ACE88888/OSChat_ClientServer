@@ -120,7 +120,7 @@ int is_help_command(char *message) { return strncmp(message, "\\HELP", 5) == 0; 
 // Checks if the message is a nickname command.
 int is_nickname_command(char *message) { return strncmp(message, "\\NICKNAME", 9) == 0; }
 
-int send_list_message(connfd) {
+int send_list_message(int connfd) {
   char message[20 * 50] = "";
   for (int i = 0; i < 20; i++) {
     if (strcmp(message_buf[i], "") == 0) break;
@@ -149,34 +149,36 @@ void handleJoinRoom(char* nick_name, char* room_name) {
 
 void roomlist() {
   int i;
-  for(i =0;i < 20;i++) {
-    if (strcmp(room_buf.name, "") == 0)
-      print(room_buf.name);
+  for(i =0; i < 20; i++) {
+    if (strcmp(room_buf[i].name, "") == 0) {
+      printf("%s\n", room_buf[i].name);
+    }
   }
 }
 
 void endsession() {
 }
 
-void userlist() {
+void userlist(int roomId) {
   int i;
-  for(i =0;i < 20;i++) {
-    if (strcmp(session.nickname, "") == 0)
-      print(session.nickname);
+  for(i =0; i < 20; i++) {
+    if (strcmp(room_buf[roomId].sessions[i].nickname, "") == 0) {
+      printf("%s\n", room_buf[roomId].sessions[i].nickname);
+    }
   }
 }
 
-void commandlist() {
-  print("Available commands are 
-  //JOIN nickname room \n
-  //ROOMS \n 
-  //LEAVE \n 
-  //WHO \n 
-  //HELP \n 
-  //nickname message \n");
+void handleCommandList() {
+  printf("The available commands are:\n");
+  printf("\\JOIN nickname room (join a specified room with the provided nickname)\n");
+  printf("\\ROOMS (list of all the available rooms)\n");
+  printf("\\LEAVE (leave the current room you are in)\n");
+  printf("\\WHO (list of all users in the current room)\n");
+  printf("\\HELP (list of commands)\n");
+  printf("\\nickname message (send a message to a user with the provided nickname)\n");
 }
 
-void handleusermessage(char nick_name, char* message) {
+void handleusermessage(char* nick_name, char* message) {
 }
 
 int process_message(int connfd, char *message) {
@@ -204,16 +206,16 @@ int process_message(int connfd, char *message) {
       endsession();
       printf("Server received the leave command.\n");
     } else if (is_who_command(message)) {
-      userlist();
+      int roomId = 1;
+      userlist(roomId);
       printf("Server received the who command.\n");
     } else if (is_help_command(message)) {
-      commandlist();
+      handleCommandList();
       printf("Server received the help command.\n");
     } else if (is_nickname_command(message)) {
       handleusermessage(args[0], args[1]);
       printf("Server received the nickname command.\n");
     } else {
-    commandlist();
       printf("The following command %s was not recognized.\n", message);
     }
   } else {
@@ -291,7 +293,7 @@ int main(int argc, char **argv) {
   // The main server loop - runs forever...
   while (1) {
     // The connection file descriptor.
-    int *connfdp = malloc(sizeof(int));
+    int *connfdp = (int*) malloc(sizeof(int));
 
     // The client's IP address information.
     struct sockaddr_in clientaddr;
