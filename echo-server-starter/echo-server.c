@@ -204,8 +204,8 @@ int handleExitSession(int connfd) {
 		for(int j =0;j<50;j++){
 			if(room_buf[i].sessions[j].port == connfd){
 			room_buf[i].sessions[j].port = -1;
-			strcpy(room_buf[i].sessions[j].nickname,""); 
-		}	
+			strcpy(room_buf[i].sessions[j].nickname,"");
+		}
 	}
 }
      return send_message(connfd, (char*) "GOODBYE\n");
@@ -213,17 +213,18 @@ int handleExitSession(int connfd) {
 }
 
 //This method will provide a list of all the users in the current room.
-void userlist(int roomId) {
+int handleUserList(int roomId) {
   int i;
   char* userList;
   //Loop through the user sessions in the room.
-  for (i =0; i < 20; i++) {
+  for (i = 0; i < 20; i++) {
     //If the user nickname is not blank (an existing user), then print the user.
     if (strcmp(room_buf[roomId].sessions[i].nickname, "") == 0) {
       strcat(userList, room_buf[roomId].sessions[i].nickname);
       strcat(userList, "\n");
     }
   }
+  return send_message(connfd, userList);
 }
 
 //This method will send the user a current list of all the commands.
@@ -270,7 +271,7 @@ int process_message(int connfd, char *message) {
       printf("Server received the leave command.\n");
     } else if (is_who_command(message)) {
       int roomId = 1;
-      userlist(roomId);
+      handleUserList(roomId);
       printf("Server received the who command.\n");
     } else if (is_help_command(message)) {
       handleCommandList(connfd);
