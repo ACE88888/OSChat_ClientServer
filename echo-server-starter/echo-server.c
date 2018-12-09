@@ -200,19 +200,16 @@ int handleRoomList(int connfd) {
 
 //This method will remove a user from a chat room and send a GOODBYE message.
 int handleExitSession(int connfd) {
-  //Loop through the rooms and user sessions.
-	for (int i = 0; i < 20; i++) {
-		for (int j = 0; j < 50;j++) {
-      //If the provided port matches the user sessions port, then reset the sessions attributes.
-			if (room_buf[i].sessions[j].port == connfd) {
-  			room_buf[i].sessions[j].port = -1;
-  			strcpy(room_buf[i].sessions[j].nickname, "");
-  		}
-  	}
-  }
-  int result = send_message(connfd, (char*) "GOODBYE\n");
-  close(connfd);
-  return result;
+	for(int i = 0; i<20; i++){
+		for(int j =0;j<50;j++){
+			if(room_buf[i].sessions[j].port == connfd){
+			room_buf[i].sessions[j].port = -1;
+			strcpy(room_buf[i].sessions[j].nickname,""); 
+		}	
+	}
+}
+     return send_message(connfd, (char*) "GOODBYE\n");
+
 }
 
 //This method will provide a list of all the users in the current room.
