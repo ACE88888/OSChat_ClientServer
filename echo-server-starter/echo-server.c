@@ -149,7 +149,7 @@ int send_echo_message(int connfd, char *message) {
   return send_message(connfd, message);
 }
 
-void handleJoinRoom(char* nick_name, char* room_name) {
+void handleJoinRoom(int connfd, char* nick_name, char* room_name) {
   int i, j, flag;
     for (i=0;i<20;i++) {
       flag = 0;
@@ -169,8 +169,15 @@ if (flag ==0) {
           flag = 1;
         }
       }
+<<<<<<< HEAD
 }
     printf("chat room is %s\n", room_buf[i].name);
+=======
+      if (flag == 1)
+        break;
+    }
+    send_message(connfd, (char*) "You have successfully joined the room.");
+>>>>>>> 3aa1e845393b83a0536a560a0934911d0e9fbbe2
 }
 
 //This method will send a user the list of available rooms.
@@ -195,11 +202,16 @@ void handleExitSession(int connfd) {
 
 }
 
+//This method will provide a list of all the users in the current room.
 void userlist(int roomId) {
   int i;
-  for(i =0; i < 20; i++) {
+  char* userList;
+  //Loop through the user sessions in the room.
+  for (i =0; i < 20; i++) {
+    //If the user nickname is not blank (an existing user), then print the user.
     if (strcmp(room_buf[roomId].sessions[i].nickname, "") == 0) {
-      printf("%s\n", room_buf[roomId].sessions[i].nickname);
+      strcat(userList, room_buf[roomId].sessions[i].nickname);
+      strcat(userList, "\n");
     }
   }
 }
@@ -228,7 +240,7 @@ int process_message(int connfd, char *message) {
       ptr = strtok(NULL, " ");
     }
     if (is_join_command(message)) {
-      handleJoinRoom(args[1], args[2]);
+      handleJoinRoom(connfd, args[1], args[2]);
       printf("Server received the join command.\n");
     } else if (is_rooms_command(message)) {
       handleRoomList(connfd);
@@ -247,7 +259,7 @@ int process_message(int connfd, char *message) {
       handleusermessage(args[0], args[1]);
       printf("Server received the nickname command.\n");
     } else {
-      printf("The following command %s was not recognized.\n", message);
+      send_message(connfd, (char*) "The following command was not recognized.\n");
     }
   } else {
     printf("Server responding with echo response.\n");
