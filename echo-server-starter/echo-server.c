@@ -195,14 +195,11 @@ int handleExitSession(int connfd) {
 		for(int j =0;j<50;j++){
 			if(room_buf[i].sessions[j].port == connfd){
 			room_buf[i].sessions[j].port = -1;
-			strcpy(room_buf[i].sessions[j].nickname,"");
+			strcpy(room_buf[i].sessions[j].nickname,""); 
 		}	
 	}
 }
-close(connfd);  
-return send_message(connfd, (char*) "GOODBYE\n");
- 
-
+     return send_message(connfd, (char*) "GOODBYE\n");
 }
 
 //This method will provide a list of all the users in the current room.
