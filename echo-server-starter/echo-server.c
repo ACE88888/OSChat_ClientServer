@@ -149,31 +149,38 @@ int send_echo_message(int connfd, char *message) {
   return send_message(connfd, message);
 }
 
+//This method allows a user to join a room with a nickname of their choice.
 int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
-  int i, j, flag;
-    for (i=0;i<20;i++) {
-      flag = 0;
-      if (strncmp(room_buf[i].name, room_name, strlen(room_name)) == 0) {
-        for (j=0;j<50;j++) {
-          if (strncmp(room_buf[i].sessions[j].nickname, "", 0) == 0)
-            strncpy(room_buf[i].sessions[j].nickname, nick_name, strlen(nick_name));
-   		room_buf[i].sessions[j].port = connfd;
-         flag = 1;
-        }
-      }
-    }
-    if (flag ==0) {
-    	for (i = 0; i<20; i++){
-        if (flag == 0 && strncmp(room_buf[i].name, "", 0) == 0) {
-          strncpy(room_buf[i].name, room_name, strlen(room_name));
-          strncpy(room_buf[i].sessions[0].nickname, nick_name, strlen(nick_name));
-	room_buf[i].sessions[j].port = connfd;
+  int clientPort = connfd;
+  int i, j, flag = 0;
+  //Loop through the available rooms.
+  for (i = 0; i < 20; i++) {
+    //If the room name provided matches a room name, then loop through the room sessions.
+    if (strncmp(room_buf[i].name, room_name, strlen(room_name)) == 0) {
+      for (j = 0; j < 50; j++) {
+        //If there is an empty session (no nickname), then give that session a nickname and port.
+        if (strncmp(room_buf[i].sessions[j].nickname, "", 0) == 0)
+          strncpy(room_buf[i].sessions[j].nickname, nick_name, strlen(nick_name));
+          room_buf[i].sessions[j].port = clientPort;
           flag = 1;
-        }
+          break;
       }
     }
-    return send_message(connfd, (char*) "You have successfully joined the room.");
-
+  }
+  //If provided room does not exist, then loop through the rooms.
+  if (flag == 0) {
+  	for (i = 0; i < 20; i++) {
+      //If there is an empty room (no name), then create a room and provide attributes to the new user session.
+      if (strncmp(room_buf[i].name, "", 0) == 0) {
+        strncpy(room_buf[i].name, room_name, strlen(room_name));
+        strncpy(room_buf[i].sessions[0].nickname, nick_name, strlen(nick_name));
+        room_buf[i].sessions[j].port = clientPort;
+        flag = 1;
+        break;
+      }
+    }
+  }
+  return send_message(connfd, (char*) "You have successfully joined the room.");
 }
 
 //This method will send a user the list of available rooms.
@@ -197,8 +204,8 @@ int handleExitSession(int connfd) {
 		for(int j =0;j<50;j++){
 			if(room_buf[i].sessions[j].port == connfd){
 			room_buf[i].sessions[j].port = -1;
-			strcpy(room_buf[i].sessions[j].nickname,""); 
-		}	
+			strcpy(room_buf[i].sessions[j].nickname,"");
+		}
 	}
 }
      return send_message(connfd, (char*) "GOODBYE\n");
@@ -206,17 +213,18 @@ int handleExitSession(int connfd) {
 }
 
 //This method will provide a list of all the users in the current room.
-void userlist(int roomId) {
+int handleUserList(int roomId) {
   int i;
   char* userList;
   //Loop through the user sessions in the room.
-  for (i =0; i < 20; i++) {
+  for (i = 0; i < 20; i++) {
     //If the user nickname is not blank (an existing user), then print the user.
     if (strcmp(room_buf[roomId].sessions[i].nickname, "") == 0) {
       strcat(userList, room_buf[roomId].sessions[i].nickname);
       strcat(userList, "\n");
     }
   }
+  return send_message(connfd, userList);
 }
 
 //This method will send the user a current list of all the commands.
@@ -263,7 +271,7 @@ int process_message(int connfd, char *message) {
       printf("Server received the leave command.\n");
     } else if (is_who_command(message)) {
       int roomId = 1;
-      userlist(roomId);
+      handleUserList(roomId);
       printf("Server received the who command.\n");
     } else if (is_help_command(message)) {
       handleCommandList(connfd);

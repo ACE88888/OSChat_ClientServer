@@ -54,7 +54,7 @@ def fileclient(f):
     fd = open(f, "r")
     connection = connect()
     sentence = fd.readline()
-
+	#opens passed in file, reads and sends messages as if the user was inputting commands.
     while sentence != '':
         print(sentence)
         send(connection, sentence)
@@ -74,7 +74,7 @@ def client():
 
 
 if __name__=="__main__":
-	if len(sys.argv) == 1 :
+	if len(sys.argv) == 1 :#checks for case where a file is passed in
 		client()
 	elif len(sys.argv)>1:
 		fileclient(sys.argv[1])
