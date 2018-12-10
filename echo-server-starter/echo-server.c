@@ -157,7 +157,8 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
         for (j=0;j<50;j++) {
           if (strncmp(room_buf[i].sessions[j].nickname, "", 0) == 0)
             strncpy(room_buf[i].sessions[j].nickname, nick_name, strlen(nick_name));
-            flag = 1;
+   		room_buf[i].sessions[j].port = connfd;
+         flag = 1;
         }
       }
     }
@@ -166,6 +167,7 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
         if (flag == 0 && strncmp(room_buf[i].name, "", 0) == 0) {
           strncpy(room_buf[i].name, room_name, strlen(room_name));
           strncpy(room_buf[i].sessions[0].nickname, nick_name, strlen(nick_name));
+	room_buf[i].sessions[j].port = connfd;
           flag = 1;
         }
       }

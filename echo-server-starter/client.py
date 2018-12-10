@@ -1,4 +1,5 @@
 from socket import *
+import sys
 
 SERVER_NAME = 'localhost'
 SERVER_PORT = 3000
@@ -39,7 +40,7 @@ def last_list(sock):
 
 
 def ask(prompt=':-p'):
-    return input(f'({prompt}) ')
+    return input(prompt)
 
 
 def prompt_on_last(sock):
@@ -49,6 +50,17 @@ def prompt_on_last(sock):
     else:
         return ask(last)
 
+def fileclient(f):
+    fd = open(f, "r")
+    connection = connect()
+    sentence = fd.readline()
+
+    while sentence != '':
+        print(sentence)
+        send(connection, sentence)
+        response = recv(connection)
+        print(response.strip())
+        sentence = fd.readline()
 
 def client():
     connection = connect()
@@ -61,4 +73,9 @@ def client():
         sentence = prompt_on_last(connection)
 
 
-client()
+if __name__=="__main__":
+	if len(sys.argv) == 1 :
+		client()
+	elif len(sys.argv)>1:
+		fileclient(sys.argv[1])
+		
