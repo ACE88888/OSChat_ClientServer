@@ -213,7 +213,7 @@ int handleExitSession(int connfd) {
 }
 
 //This method will provide a list of all the users in the current room.
-int handleUserList(int roomId) {
+int handleUserList(int roomId,int connfd) {
   int i;
   char* userList;
   //Loop through the user sessions in the room.
@@ -271,7 +271,7 @@ int process_message(int connfd, char *message) {
       printf("Server received the leave command.\n");
     } else if (is_who_command(message)) {
       int roomId = 1;
-      handleUserList(roomId);
+      handleUserList(roomId, connfd);
       printf("Server received the who command.\n");
     } else if (is_help_command(message)) {
       handleCommandList(connfd);
