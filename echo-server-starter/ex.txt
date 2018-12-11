@@ -1,2 +1,2 @@
 /join newroom newname
-/leave
+

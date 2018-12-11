@@ -163,7 +163,14 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
           strcpy(room_buf[i].sessions[j].nickname, nick_name);
           room_buf[i].sessions[j].port = clientPort;
           flag = 1;
-          break;
+          for(j=0;j<50;j++){
+		if(strcmp(room_buf[i].sessions[j].nickname,"")!=0){
+			char * message = strcat(nick_name," has joined the room.");
+			printf("%s",message);
+			send_message(room_buf[i].sessions[j].port,message);
+		}
+	  }
+	  break;
         }
       }
     }
