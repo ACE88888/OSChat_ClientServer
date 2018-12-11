@@ -159,11 +159,12 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
     if (strcmp(room_buf[i].name, room_name) == 0) {
       for (j = 0; j < 50; j++) {
         //If there is an empty session (no nickname), then give that session a nickname and port.
-        if (strcmp(room_buf[i].sessions[j].nickname, "") == 0)
+        if (strcmp(room_buf[i].sessions[j].nickname, "") == 0) {
           strcpy(room_buf[i].sessions[j].nickname, nick_name);
           room_buf[i].sessions[j].port = clientPort;
           flag = 1;
           break;
+        }
       }
     }
   }
@@ -194,7 +195,6 @@ int handleRoomList(int connfd) {
       strcat(roomList, room_buf[i].name);
       strcat(roomList, "\n");
     }
-    //printf("room: %s", room_buf[i].name);
   }
   return send_message(connfd, roomList);
 }
@@ -215,13 +215,13 @@ int handleExitSession(int connfd) {
 
 //This method will provide a list of all the users in the current room.
 int handleUserList(int connfd, int roomId) {
-  int i;
+  int j;
   char* userList;
   //Loop through the user sessions in the room.
-  for (i = 0; i < 20; i++) {
+  for (j = 0; j < 50; j++) {
     //If the user nickname is not blank (an existing user), then print the user.
-    if (strcmp(room_buf[roomId].sessions[i].nickname, "") != 0) {
-      strcat(userList, room_buf[roomId].sessions[i].nickname);
+    if (strcmp(room_buf[roomId - 1].sessions[j].nickname, "") != 0) {
+      strcat(userList, room_buf[roomId - 1].sessions[j].nickname);
       strcat(userList, "\n");
     }
   }
