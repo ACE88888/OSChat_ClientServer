@@ -156,11 +156,11 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
   //Loop through the available rooms.
   for (i = 0; i < 20; i++) {
     //If the room name provided matches a room name, then loop through the room sessions.
-    if (strncmp(room_buf[i].name, room_name, strlen(room_name)) == 0) {
+    if (strcmp(room_buf[i].name, room_name) == 0) {
       for (j = 0; j < 50; j++) {
         //If there is an empty session (no nickname), then give that session a nickname and port.
-        if (strncmp(room_buf[i].sessions[j].nickname, "", 0) == 0)
-          strncpy(room_buf[i].sessions[j].nickname, nick_name, strlen(nick_name));
+        if (strcmp(room_buf[i].sessions[j].nickname, "") == 0)
+          strcpy(room_buf[i].sessions[j].nickname, nick_name);
           room_buf[i].sessions[j].port = clientPort;
           flag = 1;
           break;
@@ -171,9 +171,9 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
   if (flag == 0) {
   	for (i = 0; i < 20; i++) {
       //If there is an empty room (no name), then create a room and provide attributes to the new user session.
-      if (strncmp(room_buf[i].name, "", 0) == 0) {
-        strncpy(room_buf[i].name, room_name, strlen(room_name));
-        strncpy(room_buf[i].sessions[0].nickname, nick_name, strlen(nick_name));
+      if (strcmp(room_buf[i].name, "") == 0) {
+        strcpy(room_buf[i].name, room_name);
+        strcpy(room_buf[i].sessions[0].nickname, nick_name);
         room_buf[i].sessions[j].port = clientPort;
         flag = 1;
         break;
@@ -190,10 +190,11 @@ int handleRoomList(int connfd) {
   //Loop through the list of rooms.
   for(i = 0; i < 20; i++) {
     //If the room is not blank (an existing room), then print the room name.
-    if (strcmp(room_buf[i].name, "") == 0) {
+    if (strcmp(room_buf[i].name, "") != 0) {
       strcat(roomList, room_buf[i].name);
       strcat(roomList, "\n");
     }
+    //printf("room: %s", room_buf[i].name);
   }
   return send_message(connfd, roomList);
 }
@@ -213,13 +214,13 @@ int handleExitSession(int connfd) {
 }
 
 //This method will provide a list of all the users in the current room.
-int handleUserList(int roomId,int connfd) {
+int handleUserList(int connfd, int roomId) {
   int i;
   char* userList;
   //Loop through the user sessions in the room.
   for (i = 0; i < 20; i++) {
     //If the user nickname is not blank (an existing user), then print the user.
-    if (strcmp(room_buf[roomId].sessions[i].nickname, "") == 0) {
+    if (strcmp(room_buf[roomId].sessions[i].nickname, "") != 0) {
       strcat(userList, room_buf[roomId].sessions[i].nickname);
       strcat(userList, "\n");
     }
@@ -271,7 +272,7 @@ int process_message(int connfd, char *message) {
       printf("Server received the leave command.\n");
     } else if (is_who_command(message)) {
       int roomId = 1;
-      handleUserList(roomId, connfd);
+      handleUserList(connfd, roomId);
       printf("Server received the who command.\n");
     } else if (is_help_command(message)) {
       handleCommandList(connfd);
