@@ -63,17 +63,16 @@ def fileclient(f):
 
 def client():
     connection = connect()
-    thread = Thread(target = message_listener, args = (connection, ))
-    thread.start()
-    thread.join()
-    thread = Thread(target = send_command, args = (connection,))
-    thread.start()
-    thread.join()
+    thread1 = Thread(target = message_listener, args = (connection, ))
+    thread1.start()
+    send_command(connection)
+    thread1.join()
 
 def message_listener(connection):
     while 1:
-        recv(connection)
-        print(response.strip())
+        print("listening")
+        response = recv(connection)
+        print(response, "= response")
 
 def send_command_file(connection, fd):
     sentence = fd.readline()
@@ -86,13 +85,12 @@ def send_command_file(connection, fd):
         sentence = fd.readline()
 
 def send_command(connection):
-    sentence = prompt_on_last(connection)
-
+    sentence = input("\n>")
+    print(sentence)
     while sentence != 'quit':
         send(connection, sentence)
-        response = recv(connection)
-        print(response.strip())
-        sentence = prompt_on_last(connection)
+        print("SEnT!!")
+        sentence = input("\n>")
 
 if __name__=="__main__":
 	if len(sys.argv) == 1 :#checks for case where a file is passed in
