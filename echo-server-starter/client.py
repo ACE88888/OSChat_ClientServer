@@ -54,25 +54,21 @@ def prompt_on_last(sock):
 def fileclient(f):
     fd = open(f, "r")
     connection = connect()
-    thread = Thread(target = message_listener, args = (connection))
+    thread = Thread(target = message_listener, args = (connection, ))
     thread.start()
-    thread.join()
-    thread = Thread(target = send_command_file, args = (connection, fd, ))
-    thread.start()
+    send_command_file(connection, fd)
     thread.join()
 
 def client():
     connection = connect()
     thread = Thread(target = message_listener, args = (connection, ))
     thread.start()
-    thread.join()
-    thread = Thread(target = send_command, args = (connection))
-    thread.start()
+    send_command(connection)
     thread.join()
 
 def message_listener(connection):
     while 1:
-        recv(connection)
+        response = recv(connection)
         print(response.strip())
 
 def send_command_file(connection, fd):
@@ -81,8 +77,8 @@ def send_command_file(connection, fd):
     while sentence != '':
         print(sentence)
         send(connection, sentence)
-        response = recv(connection)
-        print(response.strip())
+        #response = recv(connection)
+        #print(response.strip())
         sentence = fd.readline()
 
 def send_command(connection):
@@ -90,8 +86,8 @@ def send_command(connection):
 
     while sentence != 'quit':
         send(connection, sentence)
-        response = recv(connection)
-        print(response.strip())
+        #response = recv(connection)
+        #print(response.strip())
         sentence = prompt_on_last(connection)
 
 if __name__=="__main__":
