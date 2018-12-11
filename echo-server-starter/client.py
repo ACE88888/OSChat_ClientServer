@@ -1,4 +1,5 @@
 from socket import *
+from threading import Thread
 import sys
 
 SERVER_NAME = 'localhost'
@@ -53,6 +54,28 @@ def prompt_on_last(sock):
 def fileclient(f):
     fd = open(f, "r")
     connection = connect()
+    thread = Thread(target = message_listener, args = (connection))
+    thread.start()
+    thread.join()
+    thread = Thread(target = send_command_file, args = (connection, fd, ))
+    thread.start()
+    thread.join()
+
+def client():
+    connection = connect()
+    thread = Thread(target = message_listener, args = (connection, ))
+    thread.start()
+    thread.join()
+    thread = Thread(target = send_command, args = (connection))
+    thread.start()
+    thread.join()
+
+def message_listener(connection):
+    while 1:
+        recv(connection)
+        print(response.strip())
+
+def send_command_file(connection, fd):
     sentence = fd.readline()
 	#opens passed in file, reads and sends messages as if the user was inputting commands.
     while sentence != '':
@@ -62,8 +85,7 @@ def fileclient(f):
         print(response.strip())
         sentence = fd.readline()
 
-def client():
-    connection = connect()
+def send_command(connection):
     sentence = prompt_on_last(connection)
 
     while sentence != 'quit':
@@ -72,10 +94,8 @@ def client():
         print(response.strip())
         sentence = prompt_on_last(connection)
 
-
 if __name__=="__main__":
 	if len(sys.argv) == 1 :#checks for case where a file is passed in
 		client()
-	elif len(sys.argv)>1:
+	elif len(sys.argv) > 1:#if there is a file provided, let's load commands.
 		fileclient(sys.argv[1])
-		
