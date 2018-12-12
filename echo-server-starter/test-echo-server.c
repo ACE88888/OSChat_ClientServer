@@ -267,7 +267,7 @@ int handleUserList(int connfd, int roomId) {
 
 //This method will send the user a current list of all the commands.
 void handleCommandList(int connfd) {
-  send_message(connfd, (char*) "The available commands are:\n\\JOIN nickname room (join a specified room with the provided nickname)\n\\ROOMS (list of all the available rooms)\n\\LEAVE (leave the current room you are in)\n\\WHO (list of all users in the current room)\n\\HELP (list of commands)\n\\nickname message (send a message to a user with the provided nickname)\n");
+  send_message(connfd, (char*) "The available commands are:\n\\JOIN nickname room (join a specified room with the provided nickname)\n\\ROOMS (list of all the available rooms)\n\\LEAVE (leave the current room you are in)\n\\WHO (list of all users in the current room)\n\\HELP (list of commands)\n\\MESSAGEANY nickname message (send a message to a user with the provided nickname)\n\\MESSAGE nickname message (sends a message to a user that you are in a group with)");
 }
 
 int handleGroupUserMessage(char* nick_name, char* message, int connfd) {
