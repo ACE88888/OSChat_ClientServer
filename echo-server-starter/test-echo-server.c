@@ -142,10 +142,25 @@ int send_list_message(int connfd) {
 
   return send_message(connfd, message);
 }
+void echo_to_rooms(int connfd, char *message){
+        for (int i = 0; i < 20; i++) {
+    //If the room name provided matches a room name, then loop through the room sessions.
+    for (int j=0;j<50; j++){
+        if (room_buf[i].sessions[j].port == connfd) {//if sender is in room i
+                for(int k = 0; k<50;k++){//sends message to all other users in the room.
+                        if (room_buf[i].sessions[k].port != 0) {
+                        send_message(room_buf[i].sessions[k].port,message);
+                }
+                }
+        }
+}
+}
+}
 
 int send_echo_message(int connfd, char *message) {
   upper_case(message);
   add_message(message);
+  echo_to_rooms(connfd, message);
   return send_message(connfd, message);
 }
 
