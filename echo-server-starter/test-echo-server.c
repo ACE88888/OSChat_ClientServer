@@ -206,7 +206,7 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
         break;
       }
     }
-  }
+  }printf("wtf");
   pthread_mutex_unlock(&roomLock);
   return send_message(connfd, (char*) "You have successfully joined the room.\n");
 }
@@ -329,7 +329,8 @@ int process_message(int connfd, char *message) {
       fflush(stdout);
     }
     if (is_join_command(message)) {
-	    handleJoinRoom(connfd, args[1], args[2]);
+printf("oh no");	    
+handleJoinRoom(connfd, args[1], args[2]);
       printf("Server received the join command.\n");
     } else if (is_rooms_command(message)) {
       handleRoomList(connfd);
