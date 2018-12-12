@@ -180,7 +180,6 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
       for (j = 0; j < 50; j++) {
         //If there is an empty session (no nickname), then give that session a nickname and port.
         if (strcmp(room_buf[i].sessions[j].nickname, "") == 0) {
- 	       printf("we got here tho");
          strcpy(room_buf[i].sessions[j].nickname, nick_name);
           room_buf[i].sessions[j].port = clientPort;
           flag = 1;
@@ -209,7 +208,7 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
     }
   }
   pthread_mutex_unlock(&roomLock);
-  return send_message(connfd, (char*) "You have successfully joined the room.");
+  return send_message(connfd, (char*) "You have successfully joined the room.\n");
 }
 
 //This method will send a user the list of available rooms.
@@ -287,23 +286,28 @@ void handleCommandList(int connfd) {
 int handleUserMessage(char* nick_name, char* message, int connfd) {
   //Loop through the rooms and user sessions.
   pthread_mutex_lock(&roomLock);
-for (int i = 0; i < 20; i++){
-        for (int j = 0; j < 50;j++){
+  char* completeMessage;
+  for (int i = 0; i < 20; i++){
+    for (int j = 0; j < 50; j++){
       //If the user with the provided nickname exists in a room, then send a message to that user.
-                if (room_buf[i].sessions[j].port == connfd) {
-			message = strcat(strcat(message,": from "),room_buf[i].sessions[j].nickname); 
-		}
-	}
-} 
-for (int i = 0; i < 20; i++){
+      if (room_buf[i].sessions[j].port == connfd) {
+        strcat(completeMessage, room_buf[i].sessions[j].nickname);
+        strcat(completeMessage, ": ");
+        strcat(completeMessage, message);
+        strcat(completeMessage, "\n");
+		  }
+  	}
+  }
+  for (int i = 0; i < 20; i++){
   	for (int j = 0; j < 50;j++){
       //If the user with the provided nickname exists in a room, then send a message to that user.
   		if (strcmp(room_buf[i].sessions[j].nickname, nick_name) == 0) {
-			send_message(room_buf[i].sessions[j].port, message);
+			     send_message(room_buf[i].sessions[j].port, completeMessage);
       }
     }
   }
-  return send_message(connfd, message);
+  pthread_mutex_unlock(&roomLock);
+  return send_message(connfd, completeMessage);
 }
 
 int process_message(int connfd, char *message) {
@@ -323,7 +327,6 @@ int process_message(int connfd, char *message) {
       args[i++] = ptr;
       ptr = strtok(NULL, " \\");
       fflush(stdout);
-
     }
     if (is_join_command(message)) {
 	    handleJoinRoom(connfd, args[1], args[2]);
