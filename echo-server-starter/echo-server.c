@@ -124,7 +124,8 @@ int is_who_command(char *message) { return strncmp(message, "\\WHO", 4) == 0; }
 int is_help_command(char *message) { return strncmp(message, "\\HELP", 5) == 0; }
 
 // Checks if the message is a nickname command.
-int is_nickname_command(char *message) { return strncmp(message, "\\NICKNAME", 9) == 0; }
+int is_nickname_command(char *message) {return strncmp(message, "\\NAME", 5) == 0; }
+//{ return (strcmp(m1, "") != 0 && strcmp(m2, "") != 0 && m3 == NULL); }
 
 int send_list_message(int connfd) {
   char message[20 * 50] = "";
@@ -255,11 +256,11 @@ int process_message(int connfd, char *message) {
     //Parse the command arguments, if any.
     int i = 0;
     char *args[3];
-    char *ptr = strtok(message, " ");
+    char *ptr = strtok(message, " \\");
     while (ptr != NULL) {
       printf("%s\n", ptr);
       args[i++] = ptr;
-      ptr = strtok(NULL, " ");
+      ptr = strtok(NULL, " \\");
     }
     if (is_join_command(message)) {
       handleJoinRoom(connfd, args[1], args[2]);
