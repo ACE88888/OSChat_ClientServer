@@ -236,7 +236,7 @@ int handleExitSession(int connfd) {
 int handleUserList(int connfd, int roomId) {
   int j;
   char* userList;
-  
+
   //Loop through the user sessions in the room.
       pthread_mutex_lock(&roomLock);
 
@@ -291,6 +291,7 @@ int process_message(int connfd, char *message) {
       printf("%s\n", ptr);
       args[i++] = ptr;
       ptr = strtok(NULL, " ");
+      fflush(stdout);
     }
     if (is_join_command(message)) {
       handleJoinRoom(connfd, args[1], args[2]);
@@ -380,7 +381,7 @@ int main(int argc, char **argv) {
   // Initialize the message buffer lock.
   pthread_mutex_init(&lock, NULL);
 
-  // Initialize the room lock. 
+  // Initialize the room lock.
   pthread_mutex_init(&roomLock, NULL);
   // The port number for this server.
   int port = atoi(argv[1]);
