@@ -124,7 +124,7 @@ int is_who_command(char *message) { return strncmp(message, "\\WHO", 4) == 0; }
 int is_help_command(char *message) { return strncmp(message, "\\HELP", 5) == 0; }
 
 // Checks if the message is a nickname command.
-int is_nickname_command(char *message) { return strncmp(message, "\\NICKNAME", 9) == 0; }
+int is_nickname_command(char *message) { return strncmp(message, "\\MESSAGE", 8) == 0; }
 
 int send_list_message(int connfd) {
   char message[20 * 50] = "";
@@ -269,17 +269,22 @@ void handleCommandList(int connfd) {
 int handleUserMessage(char* nick_name, char* message, int connfd) {
   //Loop through the rooms and user sessions.
   pthread_mutex_lock(&roomLock);
-  for (int i = 0; i < 20; i++){
+for (int i = 0; i < 20; i++){
+        for (int j = 0; j < 50;j++){
+      //If the user with the provided nickname exists in a room, then send a message to that user.
+                if (room_buf[i].sessions[j].port == connfd) {
+			message = strcat(strcat(message,": from "),room_buf[i].sessions[j].nickname); 
+		}
+	}
+} 
+for (int i = 0; i < 20; i++){
   	for (int j = 0; j < 50;j++){
       //If the user with the provided nickname exists in a room, then send a message to that user.
   		if (strcmp(room_buf[i].sessions[j].nickname, nick_name) == 0) {
-			send_message(connfd, message);
-  			return send_message(room_buf[i].sessions[j].port, message);
+			send_message(room_buf[i].sessions[j].port, message);
       }
     }
   }
-  pthread_mutex_unlock(&roomLock);
-  message = (char*)"Message failed to send.\n";
   return send_message(connfd, message);
 }
 
@@ -320,7 +325,7 @@ int process_message(int connfd, char *message) {
       handleCommandList(connfd);
       printf("Server received the help command.\n");
     } else if (is_nickname_command(message)) {
-      handleUserMessage(args[0], args[1], connfd);
+      handleUserMessage(args[1], args[2], connfd);
       printf("Server received the nickname command.\n");
     } else {
       send_message(connfd, (char*) "The following command was not recognized.\n");
