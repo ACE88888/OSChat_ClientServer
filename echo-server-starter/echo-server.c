@@ -279,7 +279,7 @@ int process_message(int connfd, char *message) {
     char *ptr = strtok(message, " \\");
     while (ptr != NULL) {
       printf("%s\n", ptr);
-      args[i++] = ptr;
+      args[i++] = strdup(ptr);
       ptr = strtok(NULL, " \\");
       fflush(stdout);
     }

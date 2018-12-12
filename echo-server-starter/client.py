@@ -53,51 +53,51 @@ def prompt_on_last(sock):
         return ask(last)
 
 def fileclient(f):
-    lock = threading.Lock()
+    #lock = threading.Lock()
     fd = open(f, "r")
     connection = connect()
-    thread = Thread(target = message_listener, args = (connection, lock))
+    thread = Thread(target = message_listener, args = (connection))
     thread.start()
-    send_command_file(connection, fd, lock)
+    send_command_file(connection, fd)
     thread.join()
 
 def client():
-    lock = threading.Lock()
+    #lock = threading.Lock()
     connection = connect()
-    send_command(connection, lock)
-    thread = Thread(target = message_listener, args = (connection, lock))
+    thread = Thread(target = message_listener, args = (connection))
     thread.start()
+    send_command(connection)
     thread.join()
 
-def message_listener(connection, lock):
+def message_listener(connection):
     while 1:
-        lock.acquire()
+        #lock.acquire()
         response = recv(connection)
         if len(response) > 0:
             print(response.strip() + "\n")
-        lock.release()
+        #lock.release()
 
-def send_command_file(connection, fd, lock):
+def send_command_file(connection, fd):
     sentence = fd.readline()
 	#opens passed in file, reads and sends messages as if the user was inputting commands.
     while sentence != '':
-        lock.acquire()
+        #lock.acquire()
         print(sentence)
         send(connection, sentence)
         #response = recv(connection)
         #print(response.strip())
         sentence = fd.readline()
-        lock.release()
+        #lock.release()
 
-def send_command(connection, lock):
+def send_command(connection):
     sentence = prompt_on_last(connection)
     while sentence != 'quit':
-        lock.acquire()
+        #lock.acquire()
         send(connection, sentence)
         #response = recv(connection)
         #print(response.strip())
         sentence = prompt_on_last(connection)
-        lock.release()
+        #lock.release()
 
 if __name__=="__main__":
 	if len(sys.argv) == 1 :#checks for case where a file is passed in
