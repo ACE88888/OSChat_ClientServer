@@ -154,8 +154,7 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
   int clientPort = connfd;
   int i, j, flag = 0;
   //Loop through the available rooms.
-    pthread_mutex_lock(&roomLock);
-
+  pthread_mutex_lock(&roomLock);
   for (i = 0; i < 20; i++) {
     //If the room name provided matches a room name, then loop through the room sessions.
     if (strcmp(room_buf[i].name, room_name) == 0) {
@@ -165,14 +164,14 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
           strcpy(room_buf[i].sessions[j].nickname, nick_name);
           room_buf[i].sessions[j].port = clientPort;
           flag = 1;
-          for(j=0;j<50;j++){// loops over each session
-		if(strcmp(room_buf[i].sessions[j].nickname,"")!=0){//checks for another member in the room
-			char * message = strcat(nick_name," has joined the room.");
-			printf("%s",message);
-			send_message(room_buf[i].sessions[j].port,message);//sends the other member a message`
-		}
-	  }
-	  break;
+          for(j = 0; j < 50; j++){// loops over each session
+        		if(strcmp(room_buf[i].sessions[j].nickname,"")!=0){//checks for another member in the room
+        			char * message = strcat(nick_name," has joined the room.");
+        			printf("%s",message);
+        			send_message(room_buf[i].sessions[j].port,message);//sends the other member a message`
+        		}
+      	  }
+      	  break;
         }
       }
     }
@@ -190,8 +189,7 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
       }
     }
   }
-    pthread_mutex_unlock(&roomLock);
-
+  pthread_mutex_unlock(&roomLock);
   return send_message(connfd, (char*) "You have successfully joined the room.");
 }
 
@@ -200,8 +198,7 @@ int handleRoomList(int connfd) {
   int i;
   char* roomList;
   //Loop through the list of rooms.
-      pthread_mutex_lock(&roomLock);
-
+  pthread_mutex_lock(&roomLock);
   for(i = 0; i < 20; i++) {
     //If the room is not blank (an existing room), then print the room name.
     if (strcmp(room_buf[i].name, "") != 0) {
@@ -209,37 +206,33 @@ int handleRoomList(int connfd) {
       strcat(roomList, "\n");
     }
   }
-      pthread_mutex_unlock(&roomLock);
-
+  pthread_mutex_unlock(&roomLock);
   return send_message(connfd, roomList);
 }
 
 //This method will remove a user from a chat room and send a GOODBYE message.
 int handleExitSession(int connfd) {
-	    pthread_mutex_lock(&roomLock);
-
-	for(int i = 0; i<20; i++){
-		for(int j =0;j<50;j++){
-			if(room_buf[i].sessions[j].port == connfd){
-			room_buf[i].sessions[j].port = -1;
-			strcpy(room_buf[i].sessions[j].nickname,"");
-		}
-	}
-}
-    pthread_mutex_unlock(&roomLock);
-
-     return send_message(connfd, (char*) "GOODBYE\n");
-
+	pthread_mutex_lock(&roomLock);
+  //Loop through all the rooms and sessions.
+	for (int i = 0; i < 20; i++) {
+		for (int j = 0; j < 50; j++) {
+      //If the a session matches the current port, then reset the session references.
+			if (room_buf[i].sessions[j].port == connfd) {
+  			room_buf[i].sessions[j].port = -1;
+  			strcpy(room_buf[i].sessions[j].nickname, "");
+  		}
+  	}
+  }
+  pthread_mutex_unlock(&roomLock);
+  return send_message(connfd, (char*) "GOODBYE\n");
 }
 
 //This method will provide a list of all the users in the current room.
 int handleUserList(int connfd, int roomId) {
   int j;
   char* userList;
-
   //Loop through the user sessions in the room.
-      pthread_mutex_lock(&roomLock);
-
+  pthread_mutex_lock(&roomLock);
   for (j = 0; j < 50; j++) {
     //If the user nickname is not blank (an existing user), then print the user.
     if (strcmp(room_buf[roomId - 1].sessions[j].nickname, "") != 0) {
@@ -247,8 +240,7 @@ int handleUserList(int connfd, int roomId) {
       strcat(userList, "\n");
     }
   }
-      pthread_mutex_unlock(&roomLock);
-
+  pthread_mutex_unlock(&roomLock);
   return send_message(connfd, userList);
 }
 
@@ -260,8 +252,7 @@ void handleCommandList(int connfd) {
 //This method will send a message to a specific user with the given nickname.
 int handleUserMessage(char* nick_name, char* message, int connfd) {
   //Loop through the rooms and user sessions.
-        pthread_mutex_lock(&roomLock);
-
+  pthread_mutex_lock(&roomLock);
   for (int i = 0; i < 20; i++){
   	for (int j = 0; j < 50;j++){
       //If the user with the provided nickname exists in a room, then send a message to that user.
@@ -271,9 +262,8 @@ int handleUserMessage(char* nick_name, char* message, int connfd) {
       }
     }
   }
-        pthread_mutex_unlock(&roomLock);
-
-  message = (char*)"message failed to send";
+  pthread_mutex_unlock(&roomLock);
+  message = (char*)"Message failed to send.\n";
   return send_message(connfd, message);
 }
 
