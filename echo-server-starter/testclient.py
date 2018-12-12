@@ -51,6 +51,7 @@ def prompt_on_last(sock):
     else:
         return ask(last)
 
+#handles the client if there is a file of commands provided
 def fileclient(f):
     fd = open(f, "r")
     connection = connect()
@@ -61,6 +62,7 @@ def fileclient(f):
     thread.start()
     thread.join()
 
+#handles the client if there is no file provided.
 def client():
     connection = connect()
     thread1 = Thread(target = message_listener, args = (connection, ))
@@ -68,9 +70,11 @@ def client():
     send_command(connection)
     thread1.join()
 
+#this method is threaded and listens for incoming messages 24/7
 def message_listener(connection):
     while 1:
         response = recv(connection)
+        print(response + "\n")
         if (response == ""):
             break
 
@@ -78,7 +82,7 @@ def send_command_file(connection, fd):
     sentence = fd.readline()
 	#opens passed in file, reads and sends messages as if the user was inputting commands.
     while sentence != '':
-        print(sentence + "\n")
+        print(sentence)
         send(connection, sentence)
         response = recv(connection)
         print(response.strip())
@@ -87,6 +91,7 @@ def send_command_file(connection, fd):
 def send_command(connection):
     sentence = input("\n>")
     print(sentence + "\n")
+    #wait for a message quit to end the client.
     while sentence != 'quit':
         send(connection, sentence)
         sentence = input("\n>")
