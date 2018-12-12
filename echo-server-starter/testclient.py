@@ -70,9 +70,7 @@ def client():
 
 def message_listener(connection):
     while 1:
-        print("listening")
         response = recv(connection)
-        print(response, "= response")
         if (response == ""):
             break
 
@@ -80,7 +78,7 @@ def send_command_file(connection, fd):
     sentence = fd.readline()
 	#opens passed in file, reads and sends messages as if the user was inputting commands.
     while sentence != '':
-        print(sentence)
+        print(sentence + "\n")
         send(connection, sentence)
         response = recv(connection)
         print(response.strip())
@@ -88,10 +86,9 @@ def send_command_file(connection, fd):
 
 def send_command(connection):
     sentence = input("\n>")
-    print(sentence)
+    print(sentence + "\n")
     while sentence != 'quit':
         send(connection, sentence)
-        print("SEnT!!")
         sentence = input("\n>")
 
 if __name__=="__main__":
