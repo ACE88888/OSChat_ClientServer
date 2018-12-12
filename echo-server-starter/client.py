@@ -64,9 +64,9 @@ def fileclient(f):
 def client():
     lock = threading.Lock()
     connection = connect()
+    send_command(connection, lock)
     thread = Thread(target = message_listener, args = (connection, lock))
     thread.start()
-    send_command(connection, lock)
     thread.join()
 
 def message_listener(connection, lock):
