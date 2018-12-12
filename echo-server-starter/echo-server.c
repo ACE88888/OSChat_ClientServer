@@ -164,13 +164,13 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
           strcpy(room_buf[i].sessions[j].nickname, nick_name);
           room_buf[i].sessions[j].port = clientPort;
           flag = 1;
-          for(j = 0; j < 50; j++){// loops over each session
-        		if(strcmp(room_buf[i].sessions[j].nickname,"")!=0){//checks for another member in the room
-        			char * message = strcat(nick_name," has joined the room.");
-        			printf("%s",message);
-        			send_message(room_buf[i].sessions[j].port,message);//sends the other member a message`
-        		}
-      	  }
+          // for(j = 0; j < 50; j++){// loops over each session
+        	// 	if(strcmp(room_buf[i].sessions[j].nickname,"")!=0){//checks for another member in the room
+        	// 		char * message = strcat(nick_name," has joined the room.");
+        	// 		printf("%s",message);
+        	// 		send_message(room_buf[i].sessions[j].port,message);//sends the other member a message`
+        	// 	}
+      	  // }
       	  break;
         }
       }
@@ -276,11 +276,11 @@ int process_message(int connfd, char *message) {
     //Parse the command arguments, if any.
     int i = 0;
     char *args[3];
-    char *ptr = strtok(message, " ");
+    char *ptr = strtok(message, " \\");
     while (ptr != NULL) {
       printf("%s\n", ptr);
       args[i++] = ptr;
-      ptr = strtok(NULL, " ");
+      ptr = strtok(NULL, " \\");
       fflush(stdout);
     }
     if (is_join_command(message)) {
