@@ -148,7 +148,7 @@ void echo_to_rooms(int connfd, char *message){
     for (int j = 0; j < 50; j++){
       if (room_buf[i].sessions[j].port == connfd) {//if sender is in room i
         for(int k = 0; k < 50; k++){//sends message to all other users in the room.
-          if (room_buf[i].sessions[k].port != 0) {
+          if (room_buf[i].sessions[k].port != -1) {
             //append the message so it becomes nickname: message
             char* appendedMessage = room_buf[i].sessions[k].nickname;
             strcat(appendedMessage, ": ");
@@ -172,6 +172,7 @@ echo_to_rooms(connfd, message);
 int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
   int clientPort = connfd;
   int i, j, flag = 0;
+  char *msg =" has joined the room.";
   //Loop through the available rooms.
   pthread_mutex_lock(&roomLock);
   for (i = 0; i < 20; i++) {
@@ -183,17 +184,19 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
           strcpy(room_buf[i].sessions[j].nickname, nick_name);
           room_buf[i].sessions[j].port = clientPort;
           flag = 1;
-          for(j = 0; j < 50; j++){// loops over each session
-             if(strcmp(room_buf[i].sessions[j].nickname,"")!=0){//checks for another member in the room
-                  char msg[] ="a new member has joined the room.";
-                  send_message(room_buf[i].sessions[j].port,nick_name);//sends the other member a message`
-             }
-          }
-    break;
         }
       }
+      for(j = 0; j < 50; j++){ //loops over each session
+        if(strcmp(room_buf[i].sessions[j].nickname,"")!=0) {
+           if(strcmp(room_buf[i].sessions[j].nickname, nick_name)!=0) {
+              strcat(nick_name, msg);
+              send_message(room_buf[i].sessions[j].port,nick_name); //sends the other member a message`
+           }
+        } //checks for another member in the room
+      }
+    break;
+      }
     }
-  }
   //If provided room does not exist, then loop through the rooms.
   if (flag == 0) {
     for (i = 0; i < 20; i++) {
