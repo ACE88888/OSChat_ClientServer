@@ -73,6 +73,8 @@ def message_listener(connection):
         print("listening")
         response = recv(connection)
         print(response, "= response")
+        if (response == ""):
+            break
 
 def send_command_file(connection, fd):
     sentence = fd.readline()
