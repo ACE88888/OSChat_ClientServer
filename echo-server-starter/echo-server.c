@@ -124,7 +124,7 @@ int is_who_command(char *message) { return strncmp(message, "\\WHO", 4) == 0; }
 int is_help_command(char *message) { return strncmp(message, "\\HELP", 5) == 0; }
 
 // Checks if the message is a nickname command.
-int is_nickname_command(char *message) {return strncmp(message, "\\NAME", 5) == 0; }
+//int is_nickname_command(char *message) {return strncmp(message, "\\NAME", 5) == 0; }
 //{ return (strcmp(m1, "") != 0 && strcmp(m2, "") != 0 && m3 == NULL); }
 
 int send_list_message(int connfd) {
@@ -234,7 +234,7 @@ int handleExitSession(int connfd) {
     }
 }
      return send_message(connfd, (char*) "GOODBYE\n");
-
+     //close(connfd);
 }
 
 //This method will provide a list of all the users in the current room.
@@ -286,9 +286,6 @@ int process_message(int connfd, char *message) {
       args[i++] = ptr;
       ptr = strtok(NULL, " \\");
     }
-    printf("arg 0 is:%s\n", args[0]);
-    printf("arg 1 is:%s\n", args[1]);
-    printf("arg 2 is:%s\n", args[2]);
 
     if (is_join_command(message)) {
       handleJoinRoom(connfd, args[1], args[2]);
@@ -307,7 +304,6 @@ int process_message(int connfd, char *message) {
       handleCommandList(connfd);
       printf("Server received the help command.\n");
     } else if (args[1] != NULL && args[2] == NULL) {
-    //is_nickname_command(message
       handleUserMessage(args[0], args[1]);
       printf("Server received the nickname command.\n");
     } else {
