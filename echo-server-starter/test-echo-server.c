@@ -55,9 +55,9 @@ void init_message_buf() {
 }
 struct session sessions[1000];
 void init_sessions(){
-	for(int i = 0; i<1000;i++){
-		strcpy(sessions[i].nickname, "");
-		sessions[i].port = -1;
+    for(int i = 0; i<1000;i++){
+        strcpy(sessions[i].nickname, "");
+        sessions[i].port = -1;
 }
 }
 // Initialize the room buffer to empty strings.
@@ -124,7 +124,7 @@ int is_who_command(char *message) { return strncmp(message, "\\WHO", 4) == 0; }
 int is_help_command(char *message) { return strncmp(message, "\\HELP", 5) == 0; }
 
 // Checks if the message is a nickname command.
-int is_nickname_command(char *message) { return strncmp(message, "\\MESSAGE", 8) == 0; }
+//int is_nickname_command(char *message) { return strncmp(message, "\\MESSAGE", 8) == 0; }
 
 int send_list_message(int connfd) {
   char message[20 * 50] = "";
@@ -183,20 +183,20 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
          strcpy(room_buf[i].sessions[j].nickname, nick_name);
           room_buf[i].sessions[j].port = clientPort;
           flag = 1;
-           for(j = 0; j < 50; j++){// loops over each session
-          	 	if(strcmp(room_buf[i].sessions[j].nickname,"")!=0){//checks for another member in the room
-    			       //char msg[] ="a new member has joined the room.";
-          			send_message(room_buf[i].sessions[j].port,nick_name);//sends the other member a message`
-          	 	}
-      	   }
-      	  break;
+           //for(j = 0; j < 50; j++){// loops over each session
+            //    if(strcmp(room_buf[i].sessions[j].nickname,"")!=0){//checks for another member in the room
+                       //char msg[] ="a new member has joined the room.";
+            //        send_message(room_buf[i].sessions[j].port,nick_name);//sends the other member a message`
+            //    }
+          // }
+          break;
         }
       }
     }
   }
   //If provided room does not exist, then loop through the rooms.
   if (flag == 0) {
-  	for (i = 0; i < 20; i++) {
+    for (i = 0; i < 20; i++) {
       //If there is an empty room (no name), then create a room and provide attributes to the new user session.
       if (strcmp(room_buf[i].name, "") == 0) {
         strcpy(room_buf[i].name, room_name);
@@ -230,16 +230,16 @@ int handleRoomList(int connfd) {
 
 //This method will remove a user from a chat room and send a GOODBYE message.
 int handleExitSession(int connfd) {
-	pthread_mutex_lock(&roomLock);
+    pthread_mutex_lock(&roomLock);
   //Loop through all the rooms and sessions.
-	for (int i = 0; i < 20; i++) {
-		for (int j = 0; j < 50; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 50; j++) {
       //If the a session matches the current port, then reset the session references.
-			if (room_buf[i].sessions[j].port == connfd) {
-  			room_buf[i].sessions[j].port = -1;
-  			strcpy(room_buf[i].sessions[j].nickname, "");
-  		}
-  	}
+            if (room_buf[i].sessions[j].port == connfd) {
+            room_buf[i].sessions[j].port = -1;
+            strcpy(room_buf[i].sessions[j].nickname, "");
+        }
+    }
   }
   pthread_mutex_unlock(&roomLock);
   return send_message(connfd, (char*) "GOODBYE\n");
@@ -295,14 +295,14 @@ int handleUserMessage(char* nick_name, char* message, int connfd) {
         strcat(completeMessage, ": ");
         strcat(completeMessage, message);
         strcat(completeMessage, "\n");
-		  }
-  	}
+          }
+    }
   }
   for (int i = 0; i < 20; i++){
-  	for (int j = 0; j < 50;j++){
+    for (int j = 0; j < 50;j++){
       //If the user with the provided nickname exists in a room, then send a message to that user.
-  		if (strcmp(room_buf[i].sessions[j].nickname, nick_name) == 0) {
-			     send_message(room_buf[i].sessions[j].port, completeMessage);
+        if (strcmp(room_buf[i].sessions[j].nickname, nick_name) == 0) {
+                 send_message(room_buf[i].sessions[j].port, completeMessage);
       }
     }
   }
@@ -321,6 +321,7 @@ int process_message(int connfd, char *message) {
     //Parse the command arguments, if any.
     int i = 0;
     char *args[3];
+    args[0] = NULL; args[1] = NULL; args[2] = NULL;
     char *ptr = strtok(message, " \\");
     while (ptr != NULL) {
       printf("%s\n", ptr);
@@ -329,8 +330,8 @@ int process_message(int connfd, char *message) {
       fflush(stdout);
     }
     if (is_join_command(message)) {
-printf("oh no");	    
-handleJoinRoom(connfd, args[1], args[2]);
+      printf("oh no");        
+      handleJoinRoom(connfd, args[1], args[2]);
       printf("Server received the join command.\n");
     } else if (is_rooms_command(message)) {
       handleRoomList(connfd);
@@ -344,8 +345,8 @@ handleJoinRoom(connfd, args[1], args[2]);
     } else if (is_help_command(message)) {
       handleCommandList(connfd);
       printf("Server received the help command.\n");
-    } else if (is_nickname_command(message)) {
-      handleUserMessage(args[1], args[2], connfd);
+    } else if (args[1] != NULL && args[2] == NULL) {
+      handleUserMessage(args[0], args[1], connfd);
       printf("Server received the nickname command.\n");
     } else {
       send_message(connfd, (char*) "The following command was not recognized.\n");
