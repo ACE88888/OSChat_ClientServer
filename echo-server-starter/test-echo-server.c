@@ -124,10 +124,7 @@ int is_who_command(char *message) { return strncmp(message, "\\WHO", 4) == 0; }
 int is_help_command(char *message) { return strncmp(message, "\\HELP", 5) == 0; }
 
 // Checks if the message is a nickname command.
-int is_message_group_command(char *message) { return strncmp(message, "\\MESSAGE", 8) == 0; }
-
-int is_messageany_command(char *message) { return strncmp(message, "\\MESSAGEANY", 11) == 0; }
-
+int is_message_command(char *message) { return strncmp(message, "\\MESSAGE", 8) == 0; }
 
 int send_list_message(int connfd) {
   char message[20 * 50] = "";
@@ -282,25 +279,25 @@ for(int i = 0; i <20 ;i++){
 
 //This method will send the user a current list of all the commands.
 void handleCommandList(int connfd) {
-  send_message(connfd, (char*) "The available commands are:\n\\JOIN nickname room (join a specified room with the provided nickname)\n\\ROOMS (list of all the available rooms)\n\\LEAVE (leave the current room you are in)\n\\WHO (list of all users in the current room)\n\\HELP (list of commands)\n\\MESSAGEANY nickname message (send a message to a user with the provided nickname)\n\\MESSAGE nickname message (sends a message to a user that you are in a group with)");
+  send_message(connfd, (char*) "The available commands are:\n\\JOIN nickname room (join a specified room with the provided nickname)\n\\ROOMS (list of all the available rooms)\n\\LEAVE (leave the current room you are in)\n\\WHO (list of all users in the current room)\n\\HELP (list of commands)\n\\nickname message (send a message to a user in the room)\n\\MESSAGE nickname message (sends a message to a user in any room with same nickname)");
 }
 
 int handleGroupUserMessage(char* nick_name, char* message, int connfd) {
   //Loop through the rooms and user sessions.
-  //pthread_mutex_lock(&roomLock);
+  pthread_mutex_lock(&roomLock);
+  char msg[50];
 for (int i = 0; i < 20; i++){
         for (int j = 0; j < 50;j++){
       //If the user with the provided nickname exists in a room, then send a message to that user.
               if (room_buf[i].sessions[j].port == connfd) {
-			//char msg[50];
-			//strcpy(msg, room_buf[i].sessions[j].nickname);
-              //          strcat(strcat(msg,": "),message);
+			   strcpy(msg, room_buf[i].sessions[j].nickname);
+               strcat(strcat(msg,": "),message);
 
              printf("HERE");
               for (int k = 0; k < 50;k++){
             //If the user with the provided nickname exists in a room, then send a message to that user.
                 if (strcmp(room_buf[i].sessions[k].nickname, nick_name) == 0) {
-                     send_message(room_buf[i].sessions[k].port, message);
+                     send_message(room_buf[i].sessions[k].port, msg);
                      printf("im here");
                 }
            }
@@ -311,8 +308,8 @@ for (int i = 0; i < 20; i++){
 	}	
 }
   printf("here");
-  //pthread_mutex_unlock(&roomLock);
-  return send_message(connfd, message);
+  pthread_mutex_unlock(&roomLock);
+  return send_message(connfd, msg);
 }
 
 //This method will send a message to a specific user with the given nickname.
@@ -374,7 +371,7 @@ int process_message(int connfd, char *message) {
     } else if (args[1] != NULL && args[2] == NULL) {
       handleGroupUserMessage(args[0], args[1], connfd);
       printf("Server received the message any user command.\n");
-    }else if (is_message_group_command(message)) {
+    }else if (is_message_command(message)) {
       handleAnyUserMessage(args[1], args[2], connfd);
       printf("Server received the message group user command.\n");
     } else {
