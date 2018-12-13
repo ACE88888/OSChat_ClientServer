@@ -322,7 +322,7 @@ int handleAnyUserMessage(char* nick_name, char* message, int connfd) {
          for (int j = 0; j < 50;j++){
       //If the user with the provided nickname exists in a room, then send a message to that user.
   		     if (strcmp(room_buf[i].sessions[j].nickname, nick_name) == 0) {
-			   send_message(room_buf[i].sessions[j].port, message);
+			   send_message(room_buf[i].sessions[j].port, msg);
       }
     }
   }
