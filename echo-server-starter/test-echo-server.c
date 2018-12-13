@@ -286,28 +286,21 @@ int handleGroupUserMessage(char* nick_name, char* message, int connfd) {
   //Loop through the rooms and user sessions.
   pthread_mutex_lock(&roomLock);
   char msg[50];
-for (int i = 0; i < 20; i++){
-        for (int j = 0; j < 50;j++){
+  for (int i = 0; i < 20; i++){
+      for (int j = 0; j < 50;j++){
       //If the user with the provided nickname exists in a room, then send a message to that user.
-              if (room_buf[i].sessions[j].port == connfd) {
-			   strcpy(msg, room_buf[i].sessions[j].nickname);
-               strcat(strcat(msg,": "),message);
-
-             printf("HERE");
-              for (int k = 0; k < 50;k++){
+         if (room_buf[i].sessions[j].port == connfd) {
+			strcpy(msg, room_buf[i].sessions[j].nickname);
+            strcat(strcat(msg,": "),message);
+            for (int k = 0; k < 50;k++){
             //If the user with the provided nickname exists in a room, then send a message to that user.
-                if (strcmp(room_buf[i].sessions[k].nickname, nick_name) == 0) {
-                     send_message(room_buf[i].sessions[k].port, msg);
-                     printf("im here");
-                }
-           }
-               }   
-        
-
-
-	}	
-}
-  printf("here");
+               if (strcmp(room_buf[i].sessions[k].nickname, nick_name) == 0) {
+                  send_message(room_buf[i].sessions[k].port, msg);
+               }
+             }
+          }           
+	   }	
+  }
   pthread_mutex_unlock(&roomLock);
   return send_message(connfd, msg);
 }
@@ -316,19 +309,25 @@ for (int i = 0; i < 20; i++){
 int handleAnyUserMessage(char* nick_name, char* message, int connfd) {
   //Loop through the rooms and user sessions.
   pthread_mutex_lock(&roomLock);
-char* userList;
-for (int i = 0; i < 20; i++){
+  char msg[50];
+  for (int i = 0; i < 20; i++){
   	for (int j = 0; j < 50;j++){
+        if (room_buf[i].sessions[j].port == connfd) {
+            strcpy(msg, room_buf[i].sessions[j].nickname);
+            strcat(strcat(msg,": "),message);
+        }
+      }
+      }
+      for (int i = 0; i < 20; i++){
+         for (int j = 0; j < 50;j++){
       //If the user with the provided nickname exists in a room, then send a message to that user.
-  		if (strcmp(room_buf[i].sessions[j].nickname, nick_name) == 0) {
-			char msg[50]="Message from anon: ";
-			strcat(msg, message);
-			send_message(room_buf[i].sessions[j].port, message);
+  		     if (strcmp(room_buf[i].sessions[j].nickname, nick_name) == 0) {
+			   send_message(room_buf[i].sessions[j].port, message);
       }
     }
   }
   pthread_mutex_unlock(&roomLock);
-  return send_message(connfd,userList);
+  return send_message(connfd,msg);
 }
 
 int process_message(int connfd, char *message) {
