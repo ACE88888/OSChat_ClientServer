@@ -152,7 +152,11 @@ void echo_to_rooms(int connfd, char *message){
         if (room_buf[i].sessions[j].port == connfd) {//if sender is in room i
                 for(int k = 0; k<50;k++){//sends message to all other users in the room.
                         if (room_buf[i].sessions[k].port != 0) {
-                        send_message(room_buf[i].sessions[k].port,message);
+			char newmsg[50]; 
+			strcpy(newmsg, room_buf[i].sessions[j].nickname);
+			strcat(newmsg,": ");
+                        strcat(newmsg, message);
+			send_message(room_buf[i].sessions[k].port,newmsg);
                 }
                 }
         }
@@ -166,7 +170,7 @@ int send_echo_message(int connfd, char *message) {
 pthread_mutex_lock(&roomLock); 
  echo_to_rooms(connfd, message);
 pthread_mutex_unlock(&roomLock);
-  return send_message(connfd, message);
+  return 1;
 }
 
 //This method allows a user to join a room with a nickname of their choice.
@@ -182,14 +186,16 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
       for (j = 0; j < 50; j++) {
         //If there is an empty session (no nickname), then give that session a nickname and port.
         if (strcmp(room_buf[i].sessions[j].nickname, "") == 0) {
- 	printf("we got here tho");
+
          strcpy(room_buf[i].sessions[j].nickname, nick_name);
           room_buf[i].sessions[j].port = clientPort;
           flag = 1;
            for(j = 0; j < 50; j++){// loops over each session
         	 	if(strcmp(room_buf[i].sessions[j].nickname,"")!=0){//checks for another member in the room
-				//char msg[] ="a new member has joined the room.";
-        			send_message(room_buf[i].sessions[j].port,nick_name);//sends the other member a message`
+				char msg[50];
+				strcpy(msg, nick_name);
+				strcat(msg, " has joined the room.\n");
+        			send_message(room_buf[i].sessions[j].port,msg);//sends the other member a message`
         	 	}
       	   }
       	  break;
@@ -206,12 +212,15 @@ int handleJoinRoom(int connfd, char* nick_name, char* room_name) {
         strcpy(room_buf[i].sessions[0].nickname, nick_name);
         room_buf[i].sessions[j].port = clientPort;
         flag = 1;
-        break;
+        char msg[50] = "You have successfully created room : ";
+	strcat(msg,room_name);
+	send_message(connfd, msg);
+	break;
       }
     }
   }
   pthread_mutex_unlock(&roomLock);
-  return send_message(connfd, (char*) "You have successfully joined the room.\n");
+  return 1;
 }
 
 //This method will send a user the list of available rooms.
@@ -223,12 +232,12 @@ int handleRoomList(int connfd) {
   for(i = 0; i < 20; i++) {
     //If the room is not blank (an existing room), then print the room name.
     if (strcmp(room_buf[i].name, "") != 0) {
-      strcat(roomList, room_buf[i].name);
-      strcat(roomList, "\n");
+      send_message(connfd, room_buf[i].name);
+      send_message(connfd, "\n");
     }
   }
   pthread_mutex_unlock(&roomLock);
-  return send_message(connfd, roomList);
+  return 1;
 }
 
 //This method will remove a user from a chat room and send a GOODBYE message.
@@ -249,20 +258,26 @@ int handleExitSession(int connfd) {
 }
 
 //This method will provide a list of all the users in the current room.
-int handleUserList(int connfd, int roomId) {
-  int j;
-  char* userList;
+int handleUserList(int connfd) {
   //Loop through the user sessions in the room.
   pthread_mutex_lock(&roomLock);
+
+int j;
+for(int i = 0; i <20 ;i++){
   for (j = 0; j < 50; j++) {
     //If the user nickname is not blank (an existing user), then print the user.
-    if (strcmp(room_buf[roomId - 1].sessions[j].nickname, "") != 0) {
-      strcat(userList, room_buf[roomId - 1].sessions[j].nickname);
-      strcat(userList, "\n");
+    if (room_buf[i].sessions[j].port  == connfd) {//find the room
+	for (j=0;j<50;j++){//iterate over users
+      		if(room_buf[i].sessions[j].port > 0){//if user exists
+			send_message(connfd, room_buf[i].sessions[j].nickname);
+			send_message(connfd, "\n");
+		}
+	}
     }
   }
+}
   pthread_mutex_unlock(&roomLock);
-  return send_message(connfd, userList);
+  return 1;
 }
 
 //This method will send the user a current list of all the commands.
@@ -277,7 +292,9 @@ for (int i = 0; i < 20; i++){
         for (int j = 0; j < 50;j++){
       //If the user with the provided nickname exists in a room, then send a message to that user.
                 if (room_buf[i].sessions[j].port == connfd) {
-                        message = strcat(strcat(message,": from "),room_buf[i].sessions[j].nickname);
+			char msg[50];
+			strcpy(msg, room_buf[i].sessions[j].nickname);
+                        strcat(strcat(msg,": "),message);
                 
         
 
@@ -300,20 +317,22 @@ for (int i = 0; i < 20; i++){
 int handleAnyUserMessage(char* nick_name, char* message, int connfd) {
   //Loop through the rooms and user sessions.
   pthread_mutex_lock(&roomLock);
+char* userList;
 for (int i = 0; i < 20; i++){
   	for (int j = 0; j < 50;j++){
       //If the user with the provided nickname exists in a room, then send a message to that user.
   		if (strcmp(room_buf[i].sessions[j].nickname, nick_name) == 0) {
+			char msg[50]="Message from anon: ";
+			strcat(msg, message);
 			send_message(room_buf[i].sessions[j].port, message);
       }
     }
   }
   pthread_mutex_unlock(&roomLock);
-  return send_message(connfd, message);
+  return send_message(connfd,userList);
 }
 
 int process_message(int connfd, char *message) {
-  printf("%s",message);
   upper_case(message);
   if (is_list_message(message)) {
     printf("Server responding with list response.\n");
@@ -322,7 +341,7 @@ int process_message(int connfd, char *message) {
   } else if (is_command(message)) {
     //Parse the command arguments, if any.
     int i = 0;
-    char *args[3];
+    char *args[10];
     char *ptr = strtok(message, " \\");
     while (ptr != NULL) {
       printf("%s\n", ptr);
@@ -342,8 +361,7 @@ int process_message(int connfd, char *message) {
       handleExitSession(connfd);
       printf("Server received the leave command.\n");
     } else if (is_who_command(message)) {
-      int roomId = 1;
-      handleUserList(connfd, roomId);
+      handleUserList(connfd);
       printf("Server received the who command.\n");
     } else if (is_help_command(message)) {
       handleCommandList(connfd);
